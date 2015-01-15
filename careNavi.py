@@ -13,7 +13,8 @@ import requests
 import urllib
 import csv
 
-data = []
+file = open('output.txt', 'wb')
+writer = csv.writer(file)
 
 # Entries go from 1 to 8329
 for num in range(1, 8330):
@@ -40,31 +41,19 @@ for num in range(1, 8330):
 	
 		# EXAMPLE SENTENCE ===============================
 		exKanji = ""
+		exEng = ""
+		
+		# workaround for multi-line examples
 		dialogue = example.find('p', class_ = "kanji")
-
-		# print dialogue.contents
 		for line in dialogue.contents:
 			if line.string != None:
 				exKanji += line.string.strip()
 			
-		exEng = example.find('p', class_ = "eng").string
+		dialogue = example.find('p', class_ = "eng")
+		for line in dialogue.contents:
+			if line.string != None:
+				exEng += line.string.strip()
 	
-		# TAGS ============================================
-		tagged = soup.find('div', id = "tagged")
-		
-		tags = ""
-		if tagged != None:
-			for tag in tagged.findAll('a'):
-				if tag.string != None:
-					tags += tag.string + " " 
-	
-		data.append([wordKana.encode('UTF-8'), wordKanji.encode('UTF-8'), wordEng, 
-			exKanji.encode('UTF-8'), exEng, mp3Name, tags.encode('UTF-8')])
-
-# Write to CSV file
-with open('output.txt', 'wb') as fp:
-	a = csv.writer(fp, delimiter=',')
-	a.writerows(data)
-	
-
-	
+		# Write to CSV file
+		writer.writerow([wordKana.encode('UTF-8'), wordKanji.encode('UTF-8'), 
+			wordEng.encode('UTF-8'), exKanji.encode('UTF-8'), exEng.encode('UTF-8'), mp3Name])
